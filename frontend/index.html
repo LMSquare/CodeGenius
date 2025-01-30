@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Genius</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .animate-fade {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-500 to-indigo-600 font-sans">
+    <div class="container mx-auto py-10 px-6">
+        <div class="text-center mb-10">
+            <img src="https://static.vecteezy.com/system/resources/previews/016/270/670/original/abstract-face-technology-ai-artificial-intelligence-futuristic-modern-designs-and-digital-lines-on-a-modern-blue-background-vector.jpg" alt="Code Genius Logo" class="mx-auto w-28 h-28 rounded-full shadow-lg">
+            <h1 class="text-4xl font-extrabold text-white mt-6">Code Genius</h1>
+            <p class="text-lg text-indigo-100 mt-2">Your AI-powered programming assistant</p>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Describe Your Problem</h2>
+            <p class="text-gray-600 mb-4">Let Code Genius help you solve your coding problems with detailed insights and examples. Simply describe your issue, and we'll take care of the rest!</p>
+            <textarea id="userInput" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="E.g., I want to sort a list in ascending order..."></textarea>
+            <button id="submitBtn" class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 shadow-lg transform hover:scale-105 transition-transform duration-300">
+                Submit
+            </button>
+        </div>
+
+        <div id="results" class="hidden animate-fade bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Results</h2>
+            <div id="resultContent" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <footer class="text-center py-6 text-indigo-100 text-sm">
+        <p>Powered by <span class="font-bold text-white">Alpha</span> and <span class="font-bold text-white">Code Genius</span> | Designed with ❤️ and Tailwind CSS</p>
+    </footer>
+
+    <script>
+        const submitForm = async () => {
+            const userInput = document.getElementById('userInput').value;
+    
+            if (!userInput.trim()) {
+                alert('Please describe your problem.');
+                return;
+            }
+    
+            const resultsDiv = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+    
+            // Clear previous results
+            resultContent.innerHTML = '';
+    
+            try {
+                const response = await fetch('http://localhost:3000/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: userInput }),
+                });
+    
+                const data = await response.json();
+    
+                if (data.results.length === 0) {
+                    resultContent.innerHTML = '<p class="text-gray-600">No methods available for your query.</p>';
+                } else {
+                    data.results.forEach(result => {
+                        if(result.method === undefined){
+                            resultContent.innerHTML = '<p class="text-gray-600">I can\'t find the method.</p>';
+                        }
+                        else{
+                            const methodCard = `
+                            <div class="bg-gray-50 p-4 border border-gray-300 rounded-lg shadow-sm">
+                                <h3 class="font-semibold text-lg text-blue-600">${result.method}</h3>
+                                <p class="text-gray-700">${result.description}</p>
+                                
+                            </div>
+                        `;
+                        resultContent.innerHTML += methodCard;
+                        }
+                        
+                    });
+                }
+    
+                resultsDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to fetch results. Please try again later.');
+            }
+        };
+    
+        document.getElementById('submitBtn').addEventListener('click', submitForm);
+    
+        // Add a keydown event listener to detect the "Enter" key press
+        document.getElementById('userInput').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent newline in the textarea
+                submitForm();
+            }
+        });
+    </script>
+    
+</body>
+</html>
